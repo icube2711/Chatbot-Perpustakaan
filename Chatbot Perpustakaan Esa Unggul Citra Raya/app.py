@@ -8,16 +8,21 @@ from mysql.connector import Error
 app = Flask(__name__)
 app.static_folder = "static"
 
+# Fungsi untuk membuat koneksi ke database Railway
+def get_db_connection():
+    return mysql.connector.connect(
+        host=os.getenv("MYSQLHOST", "localhost"),
+        user=os.getenv("MYSQLUSER", "root"),
+        password=os.getenv("MYSQLPASSWORD", ""),
+        database=os.getenv("MYSQLDATABASE", "crud"),
+        port=int(os.getenv("MYSQLPORT", 3306))
+    )
+
+# Load intents dari database
 def load_intents_from_db():
     conn = None
     try:
-        conn = mysql.connector.connect(
-            host=os.getenv("MYSQLHOST", "localhost"),
-            user=os.getenv("MYSQLUSER", "root"),
-            password=os.getenv("MYSQLPASSWORD", ""),
-            database=os.getenv("MYSQLDATABASE", "crud"),
-            port=int(os.getenv("MYSQLPORT", 3306))
-        )
+        conn = get_db_connection()
         cur = conn.cursor(dictionary=True)
         cur.execute("SELECT * FROM intents")
         rows = cur.fetchall()
@@ -49,13 +54,7 @@ def clean_text(text):
 def get_all_subject_keywords():
     conn = None
     try:
-        conn = mysql.connector.connect(
-            host=os.getenv("MYSQLHOST", "localhost"),
-            user=os.getenv("MYSQLUSER", "root"),
-            password=os.getenv("MYSQLPASSWORD", ""),
-            database=os.getenv("MYSQLDATABASE", "crud"),
-            port=int(os.getenv("MYSQLPORT", 3306))
-        )
+        conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("SELECT DISTINCT subject FROM books")
         results = cur.fetchall()
@@ -74,13 +73,7 @@ def get_all_subject_keywords():
 def search_books_by_title(user_input):
     conn = None
     try:
-        conn = mysql.connector.connect(
-            host=os.getenv("MYSQLHOST", "localhost"),
-            user=os.getenv("MYSQLUSER", "root"),
-            password=os.getenv("MYSQLPASSWORD", ""),
-            database=os.getenv("MYSQLDATABASE", "crud"),
-            port=int(os.getenv("MYSQLPORT", 3306))
-        )
+        conn = get_db_connection()
         cur = conn.cursor(dictionary=True)
         cur.execute("SELECT title, availability, location FROM books")
         books = cur.fetchall()
@@ -118,13 +111,7 @@ def search_books_by_subject(user_input):
 
     conn = None
     try:
-        conn = mysql.connector.connect(
-            host=os.getenv("MYSQLHOST", "localhost"),
-            user=os.getenv("MYSQLUSER", "root"),
-            password=os.getenv("MYSQLPASSWORD", ""),
-            database=os.getenv("MYSQLDATABASE", "crud"),
-            port=int(os.getenv("MYSQLPORT", 3306))
-        )
+        conn = get_db_connection()
         cur = conn.cursor(dictionary=True)
         cur.execute("""
             SELECT title, location FROM books 
